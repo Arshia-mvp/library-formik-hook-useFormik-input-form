@@ -1,5 +1,6 @@
 import { useFormik } from "formik";
 import { useState } from "react";
+import * as Yup from "yup";
 
 function App() {
   const [showPassword, setShowPassword] = useState(false);
@@ -13,39 +14,36 @@ function App() {
     password: "",
   };
 
-  const validation = (values) => {
-    let errors = {};
-
-    if (!values.name) {
-      errors.name = "error : name is required";
-    }
-
-    if (!values.lastName) {
-      errors.lastName = "error : LastName is required";
-    }
-
-    if (!values.age) {
-      errors.age = "error : age is required";
-    }
-
-    if (!values.nationalIdNumber) {
-      errors.nationalIdNumber = "error : National Id Number is required";
-    }
-
-    if (!values.email) {
-      errors.email = "error : email is required";
-    }
-
-    if (!values.password) {
-      errors.password = "error : password is required";
-    }
-
-    return errors;
-  };
+  let validationSchema = Yup.object({
+    name: Yup.string()
+      .required("وارد کردن نام الزامی است")
+      .min(3, "نام باید حداقل 3 حرف داشته باشد نه کمتر")
+      .max(16, "نام حداکثر باید 16 حرف داشته باشد نه بیشتر"),
+    lastName: Yup.string()
+      .required("وارد کردن نام خانوادگی الزامی است")
+      .min(5, "نام خانوادگی حداقل باید 5 حرف داشته باشد نه کمتر")
+      .max(17, "نام خانوادگی حداکثر باید 17 حرف داشته باشد نه بیشتر"),
+    age: Yup.number()
+      .required("وارد کردن سن الزامی است")
+      .min(11, "سن شما باید بیشتر از 11 باشد نه کمتر")
+      .max(55, "سن شما باید کمتر از 55 باشد نه بیشتر"),
+    nationalIdNumber: Yup.string()
+      .required("وارد کردن کدملی الزامی است")
+      .length(10, "کدملی باید 10 تا عدد داشته باشد نه بیشتر و نه کمتر"),
+    email: Yup.string()
+      .required("وارد کردن ایمیل الزامی است")
+      .email("لطفا یک ایمیل یا جیمیل معتبر وارد کنید"),
+    password: Yup.string()
+      .required("وارد کردن رمز عبور الزامی است")
+      .min(4, "رمز عبور حداقل باید 4 کاراکتر داشته باشد نه کمتر")
+      .max(25, "رمز عبور حداقل باید 25 کاراکتر داشته باشد نه بیشتر")
+      .matches(/[A-Za-z-!@#$%^&*]/, "!@#$%^&* : رمز عبور حداقل باید یک حروف انگلیسی داشته باشد و یک کاراکتر خاص داشته باشد مثل")
+      .matches(/[0-9]/, "رمز عبور حداقل باید یک عدد داشته باشد"),
+  });
 
   const formik = useFormik({
     initialValues,
-    validate: validation,
+    validationSchema,
     onSubmit: (values) => console.log(values),
   });
 
@@ -1369,10 +1367,11 @@ function App() {
               <input
                 id="name"
                 type="text"
-                placeholder="Please Enter your Name"
+                placeholder="Please Enter your Name :"
                 name="name"
                 value={formik.values.name}
                 onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 style={{
                   animationDelay: "0.15s",
                 }}
@@ -1393,7 +1392,7 @@ function App() {
                 "
               />
 
-              {formik.errors.name && (
+              {formik.errors.name && formik.touched.name && (
                 <p
                   className="
                     premium-error
@@ -1435,10 +1434,11 @@ function App() {
               <input
                 id="lastName"
                 type="text"
-                placeholder="Please Enter your LastName"
+                placeholder="Please Enter your LastName :"
                 name="lastName"
                 value={formik.values.lastName}
                 onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 style={{
                   animationDelay: "0.25s",
                 }}
@@ -1459,7 +1459,7 @@ function App() {
                 "
               />
 
-              {formik.errors.lastName && (
+              {formik.errors.lastName && formik.touched.lastName && (
                 <p
                   className="
                     premium-error
@@ -1501,10 +1501,11 @@ function App() {
               <input
                 id="age"
                 type="number"
-                placeholder="Please Enter your Age"
+                placeholder="Please Enter your Age :"
                 name="age"
                 value={formik.values.age}
                 onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 style={{
                   animationDelay: "0.35s",
                 }}
@@ -1525,7 +1526,7 @@ function App() {
                 "
               />
 
-              {formik.errors.age && (
+              {formik.errors.age && formik.touched.age && (
                 <p
                   className="
                     premium-error
@@ -1567,10 +1568,11 @@ function App() {
               <input
                 id="nationalIdNumber"
                 type="number"
-                placeholder="Please Enter your National Id Number"
+                placeholder="Please Enter your National Id Number :"
                 name="nationalIdNumber"
                 value={formik.values.nationalIdNumber}
                 onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 style={{
                   animationDelay: "0.45s",
                 }}
@@ -1591,9 +1593,10 @@ function App() {
                 "
               />
 
-              {formik.errors.nationalIdNumber && (
-                <p
-                  className="
+              {formik.errors.nationalIdNumber &&
+                formik.touched.nationalIdNumber && (
+                  <p
+                    className="
                     premium-error
                     mt-2
                     flex
@@ -1603,12 +1606,12 @@ function App() {
                     font-medium
                     text-pink-400
                   "
-                >
-                  <span>●</span>
+                  >
+                    <span>●</span>
 
-                  {formik.errors.nationalIdNumber}
-                </p>
-              )}
+                    {formik.errors.nationalIdNumber}
+                  </p>
+                )}
             </div>
 
             {/* =================================================
@@ -1633,10 +1636,11 @@ function App() {
               <input
                 id="email"
                 type="email"
-                placeholder="Please Enter your Email"
+                placeholder="Please Enter your Email :"
                 name="email"
                 value={formik.values.email}
                 onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 style={{
                   animationDelay: "0.55s",
                 }}
@@ -1657,7 +1661,7 @@ function App() {
                 "
               />
 
-              {formik.errors.email && (
+              {formik.errors.email && formik.touched.email && (
                 <p
                   className="
                     premium-error
@@ -1700,10 +1704,11 @@ function App() {
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Please Enter your Password"
+                  placeholder="Please Enter your Password :"
                   name="password"
                   value={formik.values.password}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   style={{
                     animationDelay: "0.65s",
                   }}
@@ -1750,7 +1755,7 @@ function App() {
                 </button>
               </div>
 
-              {formik.errors.password && (
+              {formik.errors.password && formik.touched.password && (
                 <p
                   className="
                     premium-error
